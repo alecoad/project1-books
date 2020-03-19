@@ -70,11 +70,11 @@ def login():
 			return render_template("error.html", message="username does not exist")
 
         # Check that password is correct
-		if not check_password_hash({rows.hash}, request.form.get("password")):
+		if not check_password_hash({user.hash}, request.form.get("password")):
 			return render_template("error.html", message="invalid password")
 
         # Remember which user has logged in
-		session["user_id"] = {rows.id}
+		session["user_id"] = {user.id}
 
         # Redirect user to home page
 		return redirect("/")
@@ -125,15 +125,15 @@ def register():
             return render_template("error.html", message="passwords do not match")
 
         # Insert valid username into database
-        db.execute("INSERT INTO users (username, hash) VALUES (:username, :hash)",
-                   {"username": request.form.get("username"),
-				   "hash": generate_password_hash(request.form.get("password"))})
+        db.execute("INSERT INTO users (username, hash) VALUES (:username, :hash)", {"username": request.form.get("username"), "hash": generate_password_hash(request.form.get("password"))})
+
+        db.commit()
 
         # Remember which user has logged in
-        rows = db.execute("SELECT * FROM users WHERE username = :username",
+        user = db.execute("SELECT * FROM users WHERE username = :username",
                           {"username": request.form.get("username")}).fetchone()
 
-        session["user_id"] = {rows.id}
+        session["user_id"] = {user.id}
 
         # Redirect user to home page
         return redirect("/")
