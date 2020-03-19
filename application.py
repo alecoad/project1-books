@@ -63,16 +63,18 @@ def login():
 		elif not request.form.get("password"):
 			return render_template("error.html", message="must provide password")
 
-        # Query database for username
-		rows = db.execute("SELECT * FROM users WHERE username = :username",
-                          {"username": request.form.get("username")})
+        # Query database for username, ensure it exists
+		user = db.execute("SELECT * FROM users WHERE username = :username",
+                          {"username": request.form.get("username")}).fetchone()
+		if user is None:
+			return render_template("error.html", message="username does not exist")
 
-        # Ensure username exists and password is correct
-		if rows.rowcount != 1 or not check_password_hash(rows[0]["hash"], request.form.get("password")):
-			return render_template("error.html", message="invalid username and/or password")
+        # Check that password is correct
+		if not check_password_hash({rows.hash}, request.form.get("password")):
+			return render_template("error.html", message="invalid password")
 
         # Remember which user has logged in
-		session["user_id"] = rows[0]["id"]
+		session["user_id"] = {rows.id}
 
         # Redirect user to home page
 		return redirect("/")
@@ -124,14 +126,14 @@ def register():
 
         # Insert valid username into database
         db.execute("INSERT INTO users (username, hash) VALUES (:username, :hash)",
-                   {"username": request.form.get("username")},
-                   {"hash": generate_password_hash(request.form.get("password"))})
+                   {"username": request.form.get("username"),
+				   "hash": generate_password_hash(request.form.get("password"))})
 
         # Remember which user has logged in
         rows = db.execute("SELECT * FROM users WHERE username = :username",
-                          {"username": request.form.get("username")})
+                          {"username": request.form.get("username")}).fetchone()
 
-        session["user_id"] = rows[0]["id"]
+        session["user_id"] = {rows.id}
 
         # Redirect user to home page
         return redirect("/")
