@@ -1,0 +1,4 @@
+.DS_Store
+Thumbs.db
+flask_session/
+__pycache__/
