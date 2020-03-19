@@ -149,6 +149,7 @@ def register():
 
 
 @app.route("/search", methods=["POST"])
+@login_required
 def search():
     """Search for book"""
 
@@ -162,3 +163,10 @@ def search():
     results = db.execute("SELECT isbn, title, author FROM books WHERE isbn LIKE :search OR title LIKE :search OR author LIKE :search", {"search": search})
 
     return render_template("search.html", results=results)
+
+@app.route("/book", methods=["GET", "POST"])
+@login_required
+def book():
+    """Display book info"""
+
+    return render_template("book.html")
