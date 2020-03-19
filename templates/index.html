@@ -5,7 +5,13 @@
 {% endblock %}
 
 {% block main %}
-    <h1>This is the coadbooks homepage</h1>
+    <h1>Welcome, {{ name }}</h1>
+    <h2>Search for a book below. You can search by ISBN, Title, or Author.</h2>
 
-    <p>My name is {{ name }}</p>
+    <form action="/search" method="post">
+        <div class="form-group">
+            <input autocomplete="off" autofocus class="form-control" name="search" placeholder="ISBN, Title, or Author" type="text">
+        </div>
+        <button class="btn btn-primary" type="submit">Search</button>
+    </form>
 {% endblock %}

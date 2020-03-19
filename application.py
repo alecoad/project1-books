@@ -40,50 +40,52 @@ def login_required(f):
 @app.route("/")
 @login_required
 def index():
-    """Show user homepage"""
+    """Show homepage with book search"""
 
     user_id = session["user_id"]
+    username = session["username"]
 
-    return render_template("index.html", name=user_id)
+    return render_template("index.html", name=username)
 
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
-	"""Log user in"""
+    """Log user in"""
 
-	# Forget any user_id
-	session.clear()
+    # Forget any user_id
+    session.clear()
 
-	# User reached route via POST (as by submitting a form via POST)
-	if request.method == "POST":
+    # User reached route via POST (as by submitting a form via POST)
+    if request.method == "POST":
 
         # Ensure username was submitted
-		if not request.form.get("username"):
-			return render_template("error.html", message="must provide username")
+        if not request.form.get("username"):
+            return render_template("error.html", message="must provide username")
 
         # Ensure password was submitted
-		elif not request.form.get("password"):
-			return render_template("error.html", message="must provide password")
+        elif not request.form.get("password"):
+            return render_template("error.html", message="must provide password")
 
         # Query database for username, ensure it exists
-		user = db.execute("SELECT * FROM users WHERE username = :username",
-                          {"username": request.form.get("username")}).fetchone()
-		if user is None:
-			return render_template("error.html", message="username does not exist")
+        user = db.execute("SELECT * FROM users WHERE username = :username", {"username": request.form.get("username")}).fetchone()
+
+        if user is None:
+            return render_template("error.html", message="username does not exist")
 
         # Check that password is correct
-		if not check_password_hash(user.hash, request.form.get("password")):
-			return render_template("error.html", message="invalid password")
+        if not check_password_hash(user.hash, request.form.get("password")):
+            return render_template("error.html", message="invalid password")
 
         # Remember which user has logged in
-		session["user_id"] = {user.id}
+        session["user_id"] = {user.id}
+        session["username"] = {user.username}
 
         # Redirect user to home page
-		return redirect("/")
+        return redirect("/")
 
     # User reached route via GET (as by clicking a link or via redirect)
-	else:
-		return render_template("login.html")
+    else:
+        return render_template("login.html")
 
 
 @app.route("/logout")
@@ -136,6 +138,7 @@ def register():
                           {"username": request.form.get("username")}).fetchone()
 
         session["user_id"] = {user.id}
+        session["username"] = {user.username}
 
         # Redirect user to home page
         return redirect("/")
@@ -143,3 +146,19 @@ def register():
     # User reached route via GET
     else:
         return render_template("register.html")
+
+
+@app.route("/search", methods=["POST"])
+def search():
+    """Search for book"""
+
+    # Get search query from form
+    search = request.form.get("search")
+
+    # Prep for sanitation
+    search = '%' + search + '%'
+
+    # Query database for anything resembling the query.
+    results = db.execute("SELECT isbn, title, author FROM books WHERE isbn LIKE :search OR title LIKE :search OR author LIKE :search", {"search": search})
+
+    return render_template("search.html", results=results)

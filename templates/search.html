@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Search
+{% endblock %}
+
+{% block main %}
+    <h1>Search Results</h1>
+
+    <ul>
+        {% for row in results %}
+            <li><a href="#">{{ row }}</a></li>
+        {% endfor %}
+    </ul>
+{% endblock %}
