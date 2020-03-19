@@ -40,9 +40,11 @@ def login_required(f):
 @app.route("/")
 @login_required
 def index():
-	"""Show user homepage"""
+    """Show user homepage"""
 
-	return render_template("index.html")
+    user_id = session["user_id"]
+
+    return render_template("index.html", name=user_id)
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -70,7 +72,7 @@ def login():
 			return render_template("error.html", message="username does not exist")
 
         # Check that password is correct
-		if not check_password_hash({user.hash}, request.form.get("password")):
+		if not check_password_hash(user.hash, request.form.get("password")):
 			return render_template("error.html", message="invalid password")
 
         # Remember which user has logged in
