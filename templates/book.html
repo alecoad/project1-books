@@ -1,11 +1,11 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    Book
+    {{ book.title }}
 {% endblock %}
 
 {% block main %}
     <h1>The book</h1>
 
-    <p>Display book info here</p>
+    <p>Display book info here: {{ book.id }}, {{ book.title }}</p>
 {% endblock %}

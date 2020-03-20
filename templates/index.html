@@ -5,13 +5,27 @@
 {% endblock %}
 
 {% block main %}
-    <h1>Welcome, {{ name }}</h1>
-    <h2>Search for a book below. You can search by ISBN, Title, or Author.</h2>
+    <h1>Welcome to Coad Books!</h1>
+    <h2>Search for a book below.</h2>
 
-    <form action="/search" method="post">
+    <form action="{{ url_for('search') }}" method="post">
+
         <div class="form-group">
-            <input autocomplete="off" autofocus class="form-control" name="search" placeholder="ISBN, Title, or Author" type="text">
+            <input autocomplete="off" autofocus class="form-control" name="query" type="text">
         </div>
-        <button class="btn btn-primary" type="submit">Search</button>
+
+        <div>
+            <select class="form-control" name="type">
+                <option disabled selected value>Search by...</option>
+                <option>ISBN</option>
+                <option>Title</option>
+                <option>Author</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <button class="btn btn-primary" type="submit">Search</button>
+        </div>
+
     </form>
 {% endblock %}

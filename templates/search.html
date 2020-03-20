@@ -9,7 +9,13 @@
 
     <ul>
         {% for row in results %}
-            <li><a href="/book">{{ row }}</a></li>
+            <li>
+                <a href="{{ url_for('book', book_id=row.id) }}">{{ row.title }}</a>
+                     by {{ row.author }} | ISBN: {{ row.isbn }}
+            </li>
+        {% else %}
+            <li>No results.</li>
         {% endfor %}
     </ul>
+
 {% endblock %}

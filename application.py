@@ -36,17 +36,11 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
-
 @app.route("/")
 @login_required
 def index():
     """Show homepage with book search"""
-
-    user_id = session["user_id"]
-    username = session["username"]
-
-    return render_template("index.html", name=username)
-
+    return render_template("index.html")
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -60,25 +54,24 @@ def login():
 
         # Ensure username was submitted
         if not request.form.get("username"):
-            return render_template("error.html", message="must provide username")
+            return render_template("error.html", message="You must provide a username.")
 
         # Ensure password was submitted
         elif not request.form.get("password"):
-            return render_template("error.html", message="must provide password")
+            return render_template("error.html", message="You must provide a password.")
 
         # Query database for username, ensure it exists
         user = db.execute("SELECT * FROM users WHERE username = :username", {"username": request.form.get("username")}).fetchone()
 
         if user is None:
-            return render_template("error.html", message="username does not exist")
+            return render_template("error.html", message="This username does not exist.")
 
         # Check that password is correct
         if not check_password_hash(user.hash, request.form.get("password")):
-            return render_template("error.html", message="invalid password")
+            return render_template("error.html", message="Invalid password!")
 
         # Remember which user has logged in
         session["user_id"] = {user.id}
-        session["username"] = {user.username}
 
         # Redirect user to home page
         return redirect("/")
@@ -86,7 +79,6 @@ def login():
     # User reached route via GET (as by clicking a link or via redirect)
     else:
         return render_template("login.html")
-
 
 @app.route("/logout")
 def logout():
@@ -98,7 +90,6 @@ def logout():
     # Redirect user to login form
     return redirect("/")
 
-
 @app.route("/register", methods=["GET", "POST"])
 def register():
     """Register user"""
@@ -108,37 +99,34 @@ def register():
 
         # Ensure username was submitted
         if not request.form.get("username"):
-            return render_template("error.html", message="must provide username")
+            return render_template("error.html", message="You must provide a username.")
 
         # Ensure password was submitted
         elif not request.form.get("password"):
-            return render_template("error.html", message="must provide password")
+            return render_template("error.html", message="You must provide a password.")
 
         # Ensure confirmation was submitted
         elif not request.form.get("confirmation"):
-            return render_template("error.html", message="confirm password")
+            return render_template("error.html", message="Confirm password.")
 
         # Ensure username is unique (not case sensitive)
         usernames = db.execute("SELECT username FROM users")
         for user in usernames:
             if request.form.get("username") == user["username"]:
-                return render_template("error.html", message="username already exists")
+                return render_template("error.html", message="This username already exists.")
 
         # Ensure password and confirmation match
         if request.form.get("password") != request.form.get("confirmation"):
-            return render_template("error.html", message="passwords do not match")
+            return render_template("error.html", message="Passwords do not match.")
 
         # Insert valid username into database
         db.execute("INSERT INTO users (username, hash) VALUES (:username, :hash)", {"username": request.form.get("username"), "hash": generate_password_hash(request.form.get("password"))})
-
         db.commit()
 
         # Remember which user has logged in
-        user = db.execute("SELECT * FROM users WHERE username = :username",
-                          {"username": request.form.get("username")}).fetchone()
+        user = db.execute("SELECT * FROM users WHERE username = :username", {"username": request.form.get("username")}).fetchone()
 
         session["user_id"] = {user.id}
-        session["username"] = {user.username}
 
         # Redirect user to home page
         return redirect("/")
@@ -147,26 +135,44 @@ def register():
     else:
         return render_template("register.html")
 
-
 @app.route("/search", methods=["POST"])
 @login_required
 def search():
     """Search for book"""
 
-    # Get search query from form
-    search = request.form.get("search")
+    # Get search information
+    query = request.form.get("query")
+    type = request.form.get("type")
+
+    # Send error message if improper entries
+    if not query or not type:
+        return render_template("error.html", message="Invalid search.")
 
     # Prep for sanitation
-    search = '%' + search + '%'
+    query = '%' + query + '%'
 
-    # Query database for anything resembling the query.
-    results = db.execute("SELECT isbn, title, author FROM books WHERE isbn LIKE :search OR title LIKE :search OR author LIKE :search", {"search": search})
+    # Query database depending on type
+    if type == "ISBN":
+        results = db.execute("SELECT * FROM books WHERE isbn LIKE :query", {"query": query})
+    elif type == "Title":
+        results = db.execute("SELECT * FROM books WHERE LOWER(title) LIKE LOWER(:query)", {"query": query})
+    elif type == "Author":
+        results = db.execute("SELECT * FROM books WHERE LOWER(author) LIKE LOWER(:query)", {"query": query})
+    else:
+        results = None;
 
     return render_template("search.html", results=results)
 
-@app.route("/book", methods=["GET", "POST"])
+@app.route("/book/<int:book_id>")
 @login_required
-def book():
+def book(book_id):
     """Display book info"""
 
-    return render_template("book.html")
+    # Find book
+    book = db.execute("SELECT * FROM books WHERE id = :id", {"id": book_id}).fetchone()
+    if book is None:
+        return render_template("error.html", message="No such book.")
+
+    # Get all reviews
+
+    return render_template("book.html", book=book)
