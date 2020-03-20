@@ -174,5 +174,6 @@ def book(book_id):
         return render_template("error.html", message="No such book.")
 
     # Get all reviews
+    reviews = db.execute("SELECT * FROM reviews WHERE book_id = :book_id", {"book_id": book.id}).fetchall()
 
-    return render_template("book.html", book=book)
+    return render_template("book.html", book=book, reviews=reviews)

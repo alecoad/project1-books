@@ -5,7 +5,54 @@
 {% endblock %}
 
 {% block main %}
-    <h1>The book</h1>
 
-    <p>Display book info here: {{ book.id }}, {{ book.title }}</p>
+    <h1>{{ book.title }}</h1>
+    <h3>{{ book.author }}</h3>
+
+    <p>Publication Year: {{ book.year }}</p>
+    <p>ISBN: {{ book.isbn }}</p>
+
+    <h2>Reviews</h2>
+
+    {% for row in reviews %}
+        <ul>
+            <li>{{ row.text }}</li>
+        </ul>
+    {% else %}
+        <p>No reviews yet!</p>
+    {% endfor %}
+
+
+    <h4>Write your review below</h4>
+    <form action="{{ url_for('book', book_id=book.id) }}" method="post">
+
+        <div class="form-group">
+            <textarea autocomplete="off" class="form-control" name="review" placeholder="What did you think of this book?" required></textarea>
+        </div>
+
+        <h5>Rating:</h5>
+        <div class="form-group">
+            <label class="radio-inline">
+                <input type="radio" name="optradio">1
+            </label>
+            <label class="radio-inline">
+                <input type="radio" name="optradio">2
+            </label>
+            <label class="radio-inline">
+                <input type="radio" name="optradio">3
+            </label>
+            <label class="radio-inline">
+                <input type="radio" name="optradio">4
+            </label>
+            <label class="radio-inline">
+                <input type="radio" name="optradio">5
+            </label>
+        </div>
+
+        <div class="form-group">
+            <button class="btn btn-primary" type="submit">Submit Review</button>
+        </div>
+
+    </form>
+
 {% endblock %}
