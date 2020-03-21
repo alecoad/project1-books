@@ -163,7 +163,7 @@ def search():
 
     return render_template("search.html", results=results)
 
-@app.route("/book/<int:book_id>")
+@app.route("/book/<int:book_id>", methods=["GET", "POST"])
 @login_required
 def book(book_id):
     """Display book info"""
@@ -177,3 +177,37 @@ def book(book_id):
     reviews = db.execute("SELECT * FROM reviews WHERE book_id = :book_id", {"book_id": book.id}).fetchall()
 
     return render_template("book.html", book=book, reviews=reviews)
+
+@app.route("/review/<int:book_id>", methods=["GET", "POST"])
+@login_required
+def review(book_id):
+    """Form for book review"""
+
+    # Find book
+    book = db.execute("SELECT * FROM books WHERE id = :id", {"id": book_id}).fetchone()
+    if book is None:
+        return render_template("error.html", message="No such book.")
+
+    # User reached route via GET (as by clicking the Write a Review button)
+    if request.method == "GET":
+        return render_template("review.html", book=book)
+
+    # User reached route via POST (as by submitting a form via POST)
+    else:
+        # Collect rating and review from form
+        rating = request.form.get("optradio")
+        text = request.form.get("review")
+
+        # Throw error message if improper entries
+        if not rating or not text:
+            return render_template("error.html", message="You must complete the rating.")
+
+        # Insert review into database
+        db.execute("INSERT INTO reviews (rating, text, book_id) VALUES (:rating, :text, :book_id)", {"rating": rating, "text": text, "book_id": book_id})
+        db.commit()
+        return render_template("submit.html")
+
+        # Get all reviews
+        reviews = db.execute("SELECT * FROM reviews WHERE book_id = :book_id", {"book_id": book.id}).fetchall()
+
+        return render_template("book.html", book=book, reviews=reviews)
