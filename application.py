@@ -1,4 +1,5 @@
 import os
+import requests
 
 from flask import Flask, redirect, render_template, request, session
 from flask_session import Session
@@ -22,6 +23,10 @@ Session(app)
 # Set up database
 engine = create_engine(os.getenv("DATABASE_URL"))
 db = scoped_session(sessionmaker(bind=engine))
+
+# Make sure API key is set
+if not os.environ.get("API_KEY"):
+    raise RuntimeError("API_KEY not set")
 
 def login_required(f):
     """
@@ -173,10 +178,17 @@ def book(book_id):
     if book is None:
         return render_template("error.html", message="No such book.")
 
+    # Access reviews from Goodreads API
+    api_key = os.environ.get("API_KEY")
+    res = requests.get("https://www.goodreads.com/book/review_counts.json", params={"key": api_key, "isbns": book.isbn})
+    if res.status_code != 200:
+        data = jsonify({"error": "No reviews listed"})
+    data = res.json()
+
     # Get all reviews
     reviews = db.execute("SELECT * FROM reviews WHERE book_id = :book_id", {"book_id": book.id}).fetchall()
 
-    return render_template("book.html", book=book, reviews=reviews)
+    return render_template("book.html", book=book, data=data, reviews=reviews)
 
 @app.route("/review/<int:book_id>", methods=["GET", "POST"])
 @login_required

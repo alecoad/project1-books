@@ -12,7 +12,11 @@
     <p>Publication Year: {{ book.year }}</p>
     <p>ISBN: {{ book.isbn }}</p>
 
-    <h2>Reviews</h2>
+    <h2>Goodreads Reviews</h2>
+
+    <p>{{ data }}</p>
+
+    <h2>Coadbooks Reviews</h2>
 
     {% for row in reviews %}
         <ul>
