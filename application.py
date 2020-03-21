@@ -71,7 +71,7 @@ def login():
             return render_template("error.html", message="Invalid password!")
 
         # Remember which user has logged in
-        session["user_id"] = {user.id}
+        session["user_id"] = user.id
 
         # Redirect user to home page
         return redirect("/")
@@ -126,7 +126,7 @@ def register():
         # Remember which user has logged in
         user = db.execute("SELECT * FROM users WHERE username = :username", {"username": request.form.get("username")}).fetchone()
 
-        session["user_id"] = {user.id}
+        session["user_id"] = user.id
 
         # Redirect user to home page
         return redirect("/")
@@ -182,6 +182,8 @@ def book(book_id):
 @login_required
 def review(book_id):
     """Form for book review"""
+    # Keep track of user
+    user_id = session["user_id"]
 
     # Find book
     book = db.execute("SELECT * FROM books WHERE id = :id", {"id": book_id}).fetchone()
@@ -190,6 +192,10 @@ def review(book_id):
 
     # User reached route via GET (as by clicking the Write a Review button)
     if request.method == "GET":
+        # Throw error message if user has already submitted a review
+        if db.execute("SELECT user_id FROM reviews WHERE user_id = :user_id", {"user_id": user_id}).rowcount != 0:
+            return render_template("error.html", message="You may only submit one review per book.")
+
         return render_template("review.html", book=book)
 
     # User reached route via POST (as by submitting a form via POST)
@@ -203,11 +209,6 @@ def review(book_id):
             return render_template("error.html", message="You must complete the rating.")
 
         # Insert review into database
-        db.execute("INSERT INTO reviews (rating, text, book_id) VALUES (:rating, :text, :book_id)", {"rating": rating, "text": text, "book_id": book_id})
+        db.execute("INSERT INTO reviews (rating, text, book_id, user_id) VALUES (:rating, :text, :book_id, :user_id)", {"rating": rating, "text": text, "book_id": book_id, "user_id": user_id})
         db.commit()
-        return render_template("submit.html")
-
-        # Get all reviews
-        reviews = db.execute("SELECT * FROM reviews WHERE book_id = :book_id", {"book_id": book.id}).fetchall()
-
-        return render_template("book.html", book=book, reviews=reviews)
+        return render_template("submit.html", book=book)
