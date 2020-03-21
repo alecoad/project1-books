@@ -16,7 +16,7 @@
 
     {% for row in reviews %}
         <ul>
-            <li>{{ row.text }} Rating: {{ row.rating }}</li>
+            <li>Rating: {{ row.rating }}/5<br>{{ row.text }}</li>
         </ul>
     {% else %}
         <p>No reviews yet!</p>
