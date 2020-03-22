@@ -59,21 +59,21 @@ def login():
 
         # Ensure username was submitted
         if not request.form.get("username"):
-            return render_template("error.html", message="You must provide a username.")
+            return render_template("error.html", message="You must provide a username."), 400
 
         # Ensure password was submitted
         elif not request.form.get("password"):
-            return render_template("error.html", message="You must provide a password.")
+            return render_template("error.html", message="You must provide a password."), 400
 
         # Query database for username, ensure it exists
         user = db.execute("SELECT * FROM users WHERE username = :username", {"username": request.form.get("username")}).fetchone()
 
         if user is None:
-            return render_template("error.html", message="This username does not exist.")
+            return render_template("error.html", message="This username does not exist."), 404
 
         # Check that password is correct
         if not check_password_hash(user.hash, request.form.get("password")):
-            return render_template("error.html", message="Invalid password!")
+            return render_template("error.html", message="Invalid password!"), 400
 
         # Remember which user has logged in
         session["user_id"] = user.id
@@ -104,25 +104,25 @@ def register():
 
         # Ensure username was submitted
         if not request.form.get("username"):
-            return render_template("error.html", message="You must provide a username.")
+            return render_template("error.html", message="You must provide a username."), 400
 
         # Ensure password was submitted
         elif not request.form.get("password"):
-            return render_template("error.html", message="You must provide a password.")
+            return render_template("error.html", message="You must provide a password."), 400
 
         # Ensure confirmation was submitted
         elif not request.form.get("confirmation"):
-            return render_template("error.html", message="Confirm password.")
+            return render_template("error.html", message="Confirm password."), 400
 
         # Ensure username is unique (not case sensitive)
         usernames = db.execute("SELECT username FROM users")
         for user in usernames:
             if request.form.get("username") == user["username"]:
-                return render_template("error.html", message="This username already exists.")
+                return render_template("error.html", message="This username already exists."), 400
 
         # Ensure password and confirmation match
         if request.form.get("password") != request.form.get("confirmation"):
-            return render_template("error.html", message="Passwords do not match.")
+            return render_template("error.html", message="Passwords do not match."), 400
 
         # Insert valid username into database
         db.execute("INSERT INTO users (username, hash) VALUES (:username, :hash)", {"username": request.form.get("username"), "hash": generate_password_hash(request.form.get("password"))})
@@ -151,7 +151,7 @@ def search():
 
     # Send error message if improper entries
     if not query or not type:
-        return render_template("error.html", message="Invalid search.")
+        return render_template("error.html", message="Invalid search."), 400
 
     # Prep for sanitation
     query = '%' + query + '%'
@@ -176,7 +176,7 @@ def book(book_id):
     # Find book
     book = db.execute("SELECT * FROM books WHERE id = :id", {"id": book_id}).fetchone()
     if book is None:
-        return render_template("error.html", message="No such book.")
+        return render_template("error.html", message="No such book."), 404
 
     # Access reviews from Goodreads API
     api_key = os.environ.get("API_KEY")
@@ -203,13 +203,13 @@ def review(book_id):
     # Find book
     book = db.execute("SELECT * FROM books WHERE id = :id", {"id": book_id}).fetchone()
     if book is None:
-        return render_template("error.html", message="No such book.")
+        return render_template("error.html", message="No such book."), 404
 
     # User reached route via GET (as by clicking the Write a Review button)
     if request.method == "GET":
         # Throw error message if user has already submitted a review
         if db.execute("SELECT user_id FROM reviews WHERE user_id = :user_id AND book_id = :book_id", {"user_id": user_id, "book_id": book_id}).rowcount != 0:
-            return render_template("error.html", message="You may only submit one review per book.")
+            return render_template("error.html", message="You may only submit one review per book."), 400
 
         return render_template("review.html", book=book)
 
@@ -221,7 +221,7 @@ def review(book_id):
 
         # Throw error message if improper entries
         if not rating or not text:
-            return render_template("error.html", message="You must complete the rating.")
+            return render_template("error.html", message="You must complete the rating."), 400
 
         # Insert review into database
         db.execute("INSERT INTO reviews (rating, text, book_id, user_id) VALUES (:rating, :text, :book_id, :user_id)", {"rating": rating, "text": text, "book_id": book_id, "user_id": user_id})
