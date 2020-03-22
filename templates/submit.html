@@ -5,11 +5,11 @@
 {% endblock %}
 
 {% block main %}
-    <h1>Thank you!</h1>
+    <h2>Thank you!</h2>
 
-	<h2>Your review has been submitted.</h2>
+	<h1>Your review has been submitted.</h1>
 
-    <p>
-        Go back to <a href="{{ url_for('book', book_id=book.id) }}">{{ book.title }}</a> page
-    </p>
+    <h4>
+        <a href="{{ url_for('book', book_id=book.id) }}">{{ book.title }}</a>
+    </h4>
 {% endblock %}
