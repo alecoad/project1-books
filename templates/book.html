@@ -7,14 +7,17 @@
 {% block main %}
 
     <h1>{{ book.title }}</h1>
-    <h3>{{ book.author }}</h3>
+    <h2>by {{ book.author }}</h2>
 
     <p>Publication Year: {{ book.year }}</p>
     <p>ISBN: {{ book.isbn }}</p>
 
-    <h2>Goodreads Reviews</h2>
+    <br>
 
+    <h2>Goodreads Rating</h2>
     <p>Average Rating: {{ data["average_rating"] }}/5    ({{ data["work_ratings_count"] }} Ratings)</p>
+
+    <br>
 
     <h2>Coadbooks Reviews</h2>
 
@@ -25,6 +28,8 @@
     {% else %}
         <p>No reviews yet!</p>
     {% endfor %}
+
+    <br>
 
     <form action="{{ url_for('review', book_id=book.id) }}" method="get">
 

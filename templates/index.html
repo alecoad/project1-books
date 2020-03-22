@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block main %}
-    <h1>Welcome to <span class="blue">COAD</span><span class="green">BOOKS</span>!</h1>
+    <h1>Welcome to <span class="blue" id="logo">COAD</span><span class="green" id="logo">BOOKS</span>!</h1>
     <h2>Search for a book below.</h2>
 
     <form action="{{ url_for('search') }}" method="post">

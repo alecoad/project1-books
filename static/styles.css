@@ -39,13 +39,15 @@ main img {
     /* constrain images on small screens */
     max-width: 100%;
 }
-
 table {
     text-align: left;
 }
+p {
+    text-indent: 2em;
+}
 
 /* ----- Index Styles ----- */
-h1 span {
+h1 span #logo {
     font-family: "Liu Jian Mao Cao", cursive;
     font-size: 3rem;
 }
@@ -55,3 +57,5 @@ h1 .blue {
 h1 .green {
     color: #2e944b;
 }
+
+/* ----- Book Styles ----- */
