@@ -7,15 +7,29 @@
 {% block main %}
     <h1>Search Results</h1>
 
-    <ul>
-        {% for row in results %}
-            <li>
-                <a href="{{ url_for('book', book_id=row.id) }}">{{ row.title }}</a>
-                     by {{ row.author }} | ISBN: {{ row.isbn }}
-            </li>
-        {% else %}
-            <li>No results.</li>
-        {% endfor %}
-    </ul>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Author</th>
+                <th>ISBN</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in results %}
+                <tr>
+                    <td>
+                        <a href="{{ url_for('book', book_id=row.id) }}">{{ row.title }}</a>
+                    </td>
+                    <td>{{ row.author }}</td>
+                    <td>{{ row.isbn }}</td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td colspan="4">No results.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 
 {% endblock %}
