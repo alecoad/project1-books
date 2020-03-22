@@ -25,13 +25,28 @@
 
     <h2>Coadbooks Reviews</h2>
 
-    {% for row in reviews %}
-        <ul>
-            <li>Rating: <span>{{ row.rating }}/5</span><br>{{ row.text }}</li>
-        </ul>
-    {% else %}
-        <p>No reviews yet!</p>
-    {% endfor %}
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Ratings</th>
+                <th>Reviews</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for row in reviews %}
+                <tr>
+                    <td>{{ row.rating }}/5</td>
+                    <td>{{ row.text }}</td>
+                </tr>
+            {% else %}
+                <tfoot>
+                    <tr>
+                        <td>No reviews yet!</td>
+                    </tr>
+                </tfoot>
+            {% endfor %}
+        </tbody>
+    </table>
 
     <br>
 
