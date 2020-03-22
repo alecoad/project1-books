@@ -208,7 +208,7 @@ def review(book_id):
     # User reached route via GET (as by clicking the Write a Review button)
     if request.method == "GET":
         # Throw error message if user has already submitted a review
-        if db.execute("SELECT user_id FROM reviews WHERE user_id = :user_id", {"user_id": user_id}).rowcount != 0:
+        if db.execute("SELECT user_id FROM reviews WHERE user_id = :user_id AND book_id = :book_id", {"user_id": user_id, "book_id": book_id}).rowcount != 0:
             return render_template("error.html", message="You may only submit one review per book.")
 
         return render_template("review.html", book=book)
@@ -244,12 +244,12 @@ def api(isbn):
     # Calculate average rating
     sum = 0.0
     count = 0
-    if ratings is None:
-        average_score = "No reviews"
-    else:
-        for row in ratings:
-            sum += row.rating
-            count += 1
+    for row in ratings:
+        sum += row.rating
+        count += 1
+    if count != 0:
         average_score = sum / count
+    else:
+        average_score = "No reviews"
 
     return jsonify({"title": book.title, "author": book.author, "year": book.year, "isbn": book.isbn, "review_count": count, "average_score": average_score})
