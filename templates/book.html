@@ -7,15 +7,19 @@
 {% block main %}
 
     <h1>{{ book.title }}</h1>
-    <h2>by {{ book.author }}</h2>
 
-    <p>Publication Year: {{ book.year }}</p>
-    <p>ISBN: {{ book.isbn }}</p>
+    <h3>by {{ book.author }}</h3>
+
+    <p>Publication Year:</p>
+    <h5>{{ book.year }}</h5>
+    <p>ISBN:</p>
+    <h5>{{ book.isbn }}</h5>
 
     <br>
 
     <h2>Goodreads Rating</h2>
-    <p>Average Rating: {{ data["average_rating"] }}/5    ({{ data["work_ratings_count"] }} Ratings)</p>
+    <p>Average Rating: <span>{{ data["average_rating"] }}/5</span></p>
+    <p>({{ data["work_ratings_count"] }} Ratings)</p>
 
     <br>
 
@@ -23,7 +27,7 @@
 
     {% for row in reviews %}
         <ul>
-            <li>Rating: {{ row.rating }}/5<br>{{ row.text }}</li>
+            <li>Rating: <span>{{ row.rating }}/5</span><br>{{ row.text }}</li>
         </ul>
     {% else %}
         <p>No reviews yet!</p>
