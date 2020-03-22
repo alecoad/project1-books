@@ -1,7 +1,7 @@
 import os
 import requests
 
-from flask import Flask, redirect, render_template, request, session
+from flask import Flask, jsonify, redirect, render_template, request, session
 from flask_session import Session
 from functools import wraps
 from sqlalchemy import create_engine
@@ -183,7 +183,10 @@ def book(book_id):
     res = requests.get("https://www.goodreads.com/book/review_counts.json", params={"key": api_key, "isbns": book.isbn})
     if res.status_code != 200:
         data = jsonify({"error": "No reviews listed"})
-    data = res.json()
+    else:
+        data = res.json()
+        # Simplify data
+        data = data["books"][0]
 
     # Get all reviews
     reviews = db.execute("SELECT * FROM reviews WHERE book_id = :book_id", {"book_id": book.id}).fetchall()
@@ -224,3 +227,29 @@ def review(book_id):
         db.execute("INSERT INTO reviews (rating, text, book_id, user_id) VALUES (:rating, :text, :book_id, :user_id)", {"rating": rating, "text": text, "book_id": book_id, "user_id": user_id})
         db.commit()
         return render_template("submit.html", book=book)
+
+@app.route("/api/<isbn>")
+@login_required
+def api(isbn):
+    """Return details about a book from Goodreads API"""
+
+    # Make sure book exists.
+    book = db.execute("SELECT * FROM books WHERE isbn = :isbn", {"isbn": isbn}).fetchone()
+    if book is None:
+        return jsonify({"error": "Requested ISBN not in database"}), 404
+
+    # Get ratings from book
+    ratings = db.execute("SELECT rating FROM reviews WHERE book_id = :book_id", {"book_id": book.id}).fetchall()
+
+    # Calculate average rating
+    sum = 0.0
+    count = 0
+    if ratings is None:
+        average_score = "No reviews"
+    else:
+        for row in ratings:
+            sum += row.rating
+            count += 1
+        average_score = sum / count
+
+    return jsonify({"title": book.title, "author": book.author, "year": book.year, "isbn": book.isbn, "review_count": count, "average_score": average_score})
