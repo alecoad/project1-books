@@ -2,7 +2,7 @@
 
 CS50: Web Programming with Python and JavaScript
 
-This is COADBOOKS, a Flask application built to search for and review books.
+This is COADBOOKS, a Flask application built to search for and review books. I used the CS50 Finance app I made in the CS50 Web Track as a starting point for this project. Specifically, my login and registration routes were based heavily on the ones I used in CS50, as they generated and checked password hashes for a more secure session.
 
 "import.py" & "books.csv"
     The books in the database were imported using "import.py", a short Python program that takes "books.csv" and imports the 5001 books contained within into my database stored on Heroku.
